@@ -41,8 +41,7 @@
 <style>
 	body {margin:0px; padding:0px; background-color:#000;}
 	#myCanvas {position:absolute; background-color:#acd241;}
-	#myExtra {position:absolute; top:100px; left:150px;  /* display:none; */ z-index:2;}
-	#fieldID {height:40px; width:200px; font-size:40px;}
+	#myExtra {position:absolute; top:100px; left:150px;  display:none; z-index:2;}
 </style>
 
 <!-- include the complete createJS suite
@@ -125,7 +124,7 @@ function init() {
 	preload.loadManifest(manifest);		
 	*/	
 	
-	test(); // comment this out when you have preload going
+	swipeTest(); // comment this out when you have preload going
 	
 }
 
@@ -160,19 +159,202 @@ function animateProgress(e) {
 
 // app global variables here (such as layoutManager, guideManager, gridManager, pages)
 
-var gridManager;
+var layout;
+var slider;
+var slider2;
 
-
-function test() {
+function swipeTest() {
 	
-	zog("hi from test AA"); // change appName to the name of your app
-	
-	gridManager = new zim.GridManager();
-	
-	gridManager.add(new zim.Grid(stage));
-	
+	zog("hi from swipeTest"); // change appName to the name of your app
 
 	
+	var top = new createjs.Container();
+	top.setBounds(0,0,600,100);
+	var logo = makeLogo();
+	logo.cursor = "pointer";
+	logo.on("mousedown", function(e) {zop(e);});
+	logo.on("click", function() {zgo("http://zimjs.com/code/");});
+	top.addChild(logo);
+	var title = new createjs.Text("ZIM SWIPE TEST", "40px verdana", "#d1a170");	
+	title.textAlign = "center";
+	title.textBaseline = "middle";	
+	title.x = top.getBounds().width/2;
+	title.y = top.getBounds().height/2;
+	top.addChild(title);	
+	stage.addChild(top);
+	// new zim.Grid(top);
+	
+	var content = new createjs.Container();
+	content.setBounds(0,0,500,600);
+	var page = new createjs.Container();
+	var w=300; var h=400;
+	page.setBounds(0,0,w,h);
+	page.regX = w/2; 
+	page.regY = h/2;
+	page.x = content.getBounds().width / 2;
+	page.y = content.getBounds().height / 2;
+	content.addChild(page);
+	var p = new createjs.Shape();
+	p.name = "s";
+	page.addChild(p);	
+	p.graphics.f("#acd241").rr(0,0,w,h,20);
+	var edge = 60;
+	var a1 = new zim.Triangle(edge+25,edge,edge,"#acd241");
+	a1.x = page.x; a1.y = 50;
+	content.addChild(a1);
+	var a2 = a1.clone(); a2.rotation = 180;
+	a2.x = page.x; a2.y = 550;
+	content.addChild(a2);
+	var a3 = a1.clone(); a3.rotation = -90;
+	a3.x = 50; a3.y = page.y;
+	content.addChild(a3);
+	var a4 = a1.clone(); a4.rotation = 90;
+	a4.x = 450; a4.y = page.y;
+	content.addChild(a4);
+	var t = new createjs.Text("SWIPE", "50px verdana", "#000000");	
+	t.textAlign = "center";
+	t.textBaseline = "middle";	
+	t.x = page.getBounds().width/2;
+	t.y = page.getBounds().height/2;
+	page.addChild(t);
+	//page.cache(0,0,page.getBounds().width,page.getBounds().height);
+	stage.addChild(content);
+	//new zim.Grid(content, "white");
+	//new zim.Guide(content, true);
+	//new zim.Guide(content, false);
+	
+	var swipe = new zim.Swipe(stage, 50, 100);
+	swipe.on("swipe", function(e) {
+		var obj;
+		if (e.target.direction == "left") {
+			obj = {x:-2000}
+		} else if (e.target.direction == "right") {
+			obj = {x:2000}
+		} else if (e.target.direction == "up") {
+			obj = {y:-2000}
+		} else if (e.target.direction == "down") {
+			obj = {y:2000}
+		} else {
+			p.graphics.f("red").rr(0,0,w,h,20);
+			stage.update();
+			setTimeout(function() {
+				p.graphics.c().f("#acd241").rr(0,0,w,h,20);
+				stage.update();
+			}, 300);
+			return;
+		}
+		swipe.active = false;
+		zim.animate(page,obj,500,null,function(){
+			swipe.active = true;
+			page.x = content.getBounds().width / 2;
+			page.y = content.getBounds().height / 2;
+			p.graphics.c().f("#acd241").rr(0,0,w,h,20);
+		});
+		stage.update();
+		
+	});
+	
+	swipe.on("swipedown", function() {
+		p.graphics.f("#e472c4").rr(0,0,w,h,20);
+		stage.update();		
+	});
+	
+	var distance = new createjs.Container();
+	distance.setBounds(0,0,500,100);
+	slider = makeSlider(300, "D");
+	slider.y = distance.getBounds().height/2;
+	slider.x = 30;
+	slider.knob.x = slider.width/2;
+	distance.addChild(slider);
+	var d = new createjs.Text("50 px", "30px verdana", "#333");	
+	d.textAlign = "center";
+	d.textBaseline = "middle";	
+	d.x = 440;
+	d.y = distance.getBounds().height/2;
+	distance.addChild(d);
+	stage.addChild(distance);
+	var dP = new zim.Proportion(0,slider.width,0,100,null,true);
+	slider.knob.on("pressmove", function() {
+		var swipeD = dP.convert(slider.knob.x);
+		d.text = swipeD + " px";
+		swipe.distance = swipeD;
+		stage.update();
+	});
+	
+	var time = new createjs.Container();
+	time.setBounds(0,0,500,100);
+	slider2 = makeSlider(300, "T");
+	slider2.y = time.getBounds().height/2;
+	slider2.x = 30;
+	slider2.knob.x = slider2.width/2;
+	time.addChild(slider2);
+	var t = new createjs.Text("100 ms", "30px verdana", "#333");	
+	t.textAlign = "center";
+	t.textBaseline = "middle";	
+	t.x = 440;
+	t.y = distance.getBounds().height/2;
+	time.addChild(t);
+	stage.addChild(time);
+	var tP = new zim.Proportion(0,slider2.width,0,200,null,true);
+	slider2.knob.on("pressmove", function() {
+		var swipeT = tP.convert(slider2.knob.x);
+		t.text = swipeT + " ms";
+		swipe.duration = swipeT;
+		stage.update();
+	});
+	
+	stage.addChild(content); // just put it on top
+	
+	layout = new zim.Layout(stage,
+		[{object:top, marginTop:3, maxWidth:80, minHeight:10, align:"center", valign:"top"},
+		{object:content, marginTop:3, maxWidth:100, align:"center", valign:"top"},
+		{object:distance, backgroundColor:"#50c4b7", marginTop:3, maxWidth:100, height:13, align:"center", valign:"middle"},
+		{object:time, backgroundColor:"#d1a170", marginTop:0, maxWidth:100, height:13, align:"center", valign:"middle"}
+		],
+		0, "black", true, new createjs.Shape()
+		);
+	layout.removeShape();	
+	
+	// HELPER FUNCTIONS
+	
+	function makeSlider(width, letter) {
+		var slider = new createjs.Container();
+		slider.width = width;
+		var bar = new createjs.Shape();
+		bar.graphics.f("#444").dr(0,0,slider.width,3);				
+		slider.addChild(bar);
+		slider.knob = new zim.Button(44,70,letter,null,null,null,null,14,null,5);
+		slider.knob.regX = 22;
+		slider.knob.regY = 35;
+		slider.addChild(slider.knob);
+		var bounds = new createjs.Rectangle(slider.x,slider.y,slider.width,0);
+		setTimeout(function() {
+			// local bounds will be set to parent so wait for it to be added
+			zim.drag(slider.knob, bounds, "pointer", "pointer", null, null, true);
+		}, 100);
+		return slider;
+	}
+
+	function makeLogo() {
+		var logo = new createjs.Container();
+		var circle = zimCircle();
+		logo.addChild(circle);
+		return logo;			
+	}		
+	
+	function zimCircle() {
+		var colors = ["#f58e25","#acd241", "#e472c4", "#50c4b7", "#d1a170", "#222222"];	
+		var c = new createjs.Shape();
+		var g = c.graphics;
+		c.radius = 50;
+		for (var i=0; i<colors.length; i++) {
+			g.f(colors[i]).dc(0,0,(c.radius/colors.length)*(colors.length-i));
+		}	
+		c.setBounds(-c.radius,-c.radius,c.radius*2,c.radius*2);
+		c.regX = -c.radius; c.regY = -c.radius;			
+		return c;
+	}	
+		
 	// keep at end of main function
 	// for the fit scale mode you will probably need to code below
 	// to scale things as the screen size varies	
@@ -196,8 +378,7 @@ function fullResize() { // called from the sizeCanvas() function below if in ful
 	
 	// do any custom scaling
 	
-	
-	zid("fieldID").value = zim.windowHeight();
+
 	
 	// ZIM PAGES MODULE - here is a guideline for resizing
 	
@@ -205,9 +386,9 @@ function fullResize() { // called from the sizeCanvas() function below if in ful
 	
 	// resize the gridManager
 	
-	gridManager.resize();
-	
 	// resize the layoutManager (or see Orientation Change)
+	
+	layout.resize(); // no layoutManager in this case as only one layout
 	
 	// resize the pages (or see Orientation Change)
 	
@@ -291,8 +472,6 @@ function fullResize() { // called from the sizeCanvas() function below if in ful
 // unless you need HTML code (such as input fields)
 
 function sizeCanvas() {
-	
-	window.scrollTo(0,null);
 	
 	var can = zid("myCanvas");	
 	var w = window.innerWidth;

@@ -1,11 +1,11 @@
-<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.danzen.template" version="1.0.0">
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.danzen.template" version="1.0.1">
   <name>Template</name>
   <description>Test to see the resizing template works</description>
   <author href="http://danzen.com" email="door@danzen.com">Dan Zen</author>
   <content src="index.html"/>
   <gap:platform name="ios" />
   <preference name="permissions" value="none"/>
-  <preference name="orientation" value="vertical"/>
+  <preference name="orientation" value="portrait"/>
   <preference name="target-device" value="universal"/>
   <preference name="fullscreen" value="true"/>
   <preference name="webviewbounce" value="true"/>
